@@ -2,11 +2,9 @@ package com.omo_lanke.android.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.support.annotation.Nullable;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,18 +13,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.omo_lanke.android.popularmovies.Adapters.MovieAdapter;
-import com.omo_lanke.android.popularmovies.api.Endpoints;
 import com.omo_lanke.android.popularmovies.api.TMDBService;
 import com.omo_lanke.android.popularmovies.model.ApiResponse;
 import com.omo_lanke.android.popularmovies.model.MovieItem;
 import com.omo_lanke.android.popularmovies.utils.AppConstants;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -34,8 +28,6 @@ import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static java.security.AccessController.getContext;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -60,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
         myListAdapter = new MovieAdapter(context);
 
-        final GridLayoutManager layoutManager = new GridLayoutManager(context,3);
+        final GridLayoutManager layoutManager = new GridLayoutManager(context,2);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         movieList.setLayoutManager(layoutManager);
         movieList.setHasFixedSize(true);
@@ -76,17 +68,10 @@ public class MainActivity extends AppCompatActivity {
         popularMovies.enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                Log.d("Response", "onResponse: " + response.body().getTotal_pages());
+
                 List<MovieItem> moviesList = null;
                 try{
                     moviesList = response.body().getResults();
-//                    myListAdapter = new MovieAdapter(context,moviesList);
-
-//                    final GridLayoutManager layoutManager = new GridLayoutManager(context,3);
-//                    layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-//                    movieList.setLayoutManager(layoutManager);
-//                    movieList.setHasFixedSize(true);
-//                    movieList.setAdapter(myListAdapter);
 
                     loadingView.setVisibility(View.GONE);
 
@@ -120,11 +105,8 @@ public class MainActivity extends AppCompatActivity {
 
 @Override
 public boolean onCreateOptionsMenu(Menu menu) {
-        /* Use AppCompatActivity's method getMenuInflater to get a handle on the menu inflater */
     MenuInflater inflater = getMenuInflater();
-        /* Use the inflater's inflate method to inflate our menu layout to this menu */
     inflater.inflate(R.menu.menu_details, menu);
-        /* Return true so that the menu is displayed in the Toolbar */
     return true;
 }
 

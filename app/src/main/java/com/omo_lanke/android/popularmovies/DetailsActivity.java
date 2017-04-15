@@ -46,8 +46,17 @@ public class DetailsActivity extends AppCompatActivity {
     @BindView(R.id.release)
     TextView release;
 
+    @BindView(R.id.length)
+    TextView length;
+
+    @BindView(R.id.rate)
+    TextView rate;
+
     @BindView(R.id.toolbar_bg)
     ImageView toolbar_bg;
+
+    @BindView(R.id.poster)
+    ImageView poster;
 
     Context context;
     String movieShare = "";
@@ -108,13 +117,18 @@ public class DetailsActivity extends AppCompatActivity {
                     movie_rating.setRating((Float.parseFloat(moviesDetail.getVote_average()))/2);
                     overview.setText(moviesDetail.getOverview());
                     movie_title.setText(moviesDetail.getOriginal_title());
-                    release.setText("Released: " + moviesDetail.getRelease_date());
+                    release.setText( moviesDetail.getRelease_date());
+                    length.setText(moviesDetail.getRuntime()+ "min");
+                    rate.setText(moviesDetail.getVote_average() + "/" + 10);
                     setName(moviesDetail.getOriginal_title() );
                     movieShare = moviesDetail.getOriginal_title() + " " + moviesDetail.getHomepage();
-//                    Log.e("Title", "onResponse: " +moviesDetail.getOriginal_title() );
+
                     Picasso.with(context)
                             .load(AppConstants.IMAGE_URL2 + moviesDetail.getBackdrop_path())
                             .into(toolbar_bg);
+                    Picasso.with(context)
+                            .load(AppConstants.IMAGE_URL+moviesDetail.getPoster_path())
+                            .into(poster);
                     loadingView.setVisibility(View.GONE);
 
                 }catch (Exception e){
