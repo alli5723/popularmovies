@@ -3,7 +3,6 @@ package com.omo_lanke.android.popularmovies;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ShareCompat;
@@ -17,12 +16,9 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.omo_lanke.android.popularmovies.api.TMDBService;
-import com.omo_lanke.android.popularmovies.model.ApiResponse;
 import com.omo_lanke.android.popularmovies.model.MovieDetail;
 import com.omo_lanke.android.popularmovies.utils.AppConstants;
 import com.squareup.picasso.Picasso;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

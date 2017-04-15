@@ -2,7 +2,6 @@ package com.omo_lanke.android.popularmovies.api;
 
 import com.omo_lanke.android.popularmovies.model.ApiResponse;
 import com.omo_lanke.android.popularmovies.model.MovieDetail;
-import com.omo_lanke.android.popularmovies.utils.AppConstants;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

@@ -2,12 +2,9 @@ package com.omo_lanke.android.popularmovies.Adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -42,23 +39,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
         this.context = context;
     }
 
-    public MovieAdapter(Context context, List<MovieItem> values) {
-        this.context = context;
-        this.values = values;
-    }
-
     public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-//        public final TextView movName;
 
         public MovieAdapterViewHolder(View view){
             super(view);
-//            movName = (TextView)view.findViewById(R.id.movie_name);
         }
 
         public void onClick(View v){
             int pos = getAdapterPosition();
             String movieName = values.get(pos).getOriginal_title();
-//            mClickHandler.onClick(movieName);
         }
     }
 
@@ -90,9 +79,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
 
         Picasso.with(context)
         .load(AppConstants.IMAGE_URL + values.get(position).getPoster_path())
-//                .resize(150, 150)
-////                .placeholder(R.drawable.person)
-////                .error(R.drawable.person)
         .into(movieImage);
     }
 
