@@ -2,6 +2,8 @@ package com.omo_lanke.android.popularmovies.api;
 
 import com.omo_lanke.android.popularmovies.model.ApiResponse;
 import com.omo_lanke.android.popularmovies.model.MovieDetail;
+import com.omo_lanke.android.popularmovies.model.ReviewsResponse;
+import com.omo_lanke.android.popularmovies.model.TrailerResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -19,4 +21,9 @@ public interface Endpoints {
     @GET("/3/movie/{movie_id}")
     Call<MovieDetail> getDetails(@Path("movie_id") String movie_id, @Query("api_key") String api_key);
 
+    @GET("/3/movie/{id}/videos")
+    Call<TrailerResponse> getTrailers(@Path("id") String id, @Query("api_key") String api_key);
+
+    @GET("/3/movie/{id}/reviews")
+    Call<ReviewsResponse> getReviews(@Path("id") String id, @Query("api_key") String api_key);
 }

@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.omo_lanke.android.popularmovies.DetailsActivity">
+    tools:context="com.omo_lanke.android.popularmovies.MainActivity">
     <group android:checkableBehavior="single">
         <item
             android:checked="true"
@@ -13,6 +13,11 @@
             android:id="@+id/action_rating"
             android:orderInCategory="101"
             android:title="@string/action_rating"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_favorite"
+            android:orderInCategory="102"
+            android:title="@string/action_fav"
             app:showAsAction="never" />
     </group>
 </menu>

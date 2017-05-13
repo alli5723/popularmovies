@@ -7,9 +7,9 @@ import java.util.List;
  */
 
 public class ApiResponse {
-    List<MovieItem> results;
+    List<MovieDetail> results;
 
-    public List<MovieItem> getResults() {
+    public List<MovieDetail> getResults() {
         return results;
     }
 }
