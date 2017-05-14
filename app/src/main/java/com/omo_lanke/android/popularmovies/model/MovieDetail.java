@@ -1,10 +1,13 @@
 package com.omo_lanke.android.popularmovies.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by omo_lanke on 14/04/2017.
  */
 
-public class MovieDetail {
+public class MovieDetail implements Parcelable {
     String id;
     String backdrop_path;
     String overview;
@@ -86,6 +89,58 @@ public class MovieDetail {
     public void setRuntime(String runtime) {
         this.runtime = runtime;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public MovieDetail(){
+
+    }
+
+    private MovieDetail(Parcel in){
+        id = in.readString();
+        backdrop_path = in.readString();
+        overview = in.readString();
+        poster_path = in.readString();
+        homepage = in.readString();
+        original_title = in.readString();
+        vote_average = in.readString();
+        release_date = in.readString();
+        runtime = in.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(id);
+        parcel.writeString(backdrop_path);
+        parcel.writeString(overview);
+        parcel.writeString(poster_path);
+        parcel.writeString(homepage);
+        parcel.writeString(original_title);
+        parcel.writeString(vote_average);
+        parcel.writeString(release_date);
+        parcel.writeString(runtime);
+    }
+
+    public static final Parcelable.Creator<MovieDetail> CREATOR = new Parcelable.ClassLoaderCreator<MovieDetail>() {
+
+        @Override
+        public MovieDetail createFromParcel(Parcel source) {
+            return new MovieDetail(source);
+        }
+
+        @Override
+        public MovieDetail[] newArray(int size) {
+            return new MovieDetail[size];
+        }
+
+        @Override
+        public MovieDetail createFromParcel(Parcel source, ClassLoader loader) {
+            return null;
+        }
+    };
 }
 
 

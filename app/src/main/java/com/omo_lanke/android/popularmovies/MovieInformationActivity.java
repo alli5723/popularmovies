@@ -4,27 +4,23 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.design.widget.TabLayout;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
@@ -94,7 +90,7 @@ public class MovieInformationActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
 
-    Context context;
+    public Context context;
     String movieShare = "";
     public static MovieDetail movieClicked;
     public static List<ReviewsDetails> reviews = new ArrayList<>();
@@ -111,6 +107,7 @@ public class MovieInformationActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        context = this;
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -147,7 +144,12 @@ public class MovieInformationActivity extends AppCompatActivity {
         fabTrailer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                playTrailer();
+                if(trailers.size() > 0) {
+                    playTrailer(trailers.get(0).getKey());
+                }else {
+                    Snackbar.make(loadingView, "Sorry, your app is still searching for trailers.", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
             }
         });
 
@@ -188,14 +190,14 @@ public class MovieInformationActivity extends AppCompatActivity {
 
     }
 
-    void playTrailer(){
-        if(trailers == null) {
+    void playTrailer(String key){
+        if(key == null || key.isEmpty()) {
             Snackbar.make(loadingView, "Sorry, but this movie does not have any trailer.", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
             return;
         }
 
-        String url = AppConstants.VIDEO_BASE + trailers.get(0).getKey();
+        String url = AppConstants.VIDEO_BASE + key;
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(url));
         startActivity(i);
@@ -218,6 +220,7 @@ public class MovieInformationActivity extends AppCompatActivity {
                     Snackbar.make(toolbar_bg, "Error occured while we try to load the movie details. Please, try later", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
+                loadingView.setVisibility(View.GONE);
             }
 
             @Override
@@ -227,12 +230,9 @@ public class MovieInformationActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-
-        reviews = getReviews(movieClicked.getId());
-        trailers = getTrailers(movieClicked.getId());
     }
 
-    public List<TrailerDetails> getTrailers(String movie_id){
+    public static List<TrailerDetails> getTrailers(String movie_id){
         final List<TrailerDetails> trailers = new ArrayList<>();
         Call<TrailerResponse> movieTrailers = new TMDBService().endpoints().getTrailers(movie_id, AppConstants.APIKey);
 
@@ -247,17 +247,12 @@ public class MovieInformationActivity extends AppCompatActivity {
                     }
                 }catch (Exception e){
                     e.printStackTrace();
-                    Snackbar.make(toolbar_bg, "Error occured while we try to load the movie trailers. Please, try later", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
                 }
-                fabTrailer.setVisibility(View.VISIBLE);
-                loadingView.setVisibility(View.GONE);
+                trailerListAdapter.resetData(trailers);
             }
 
             @Override
             public void onFailure(Call<TrailerResponse> call, Throwable t) {
-                Snackbar.make(toolbar_bg, "Error occured while we try to load the movie trailers. Please, try later", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
             }
         });
         return trailers;
@@ -279,6 +274,7 @@ public class MovieInformationActivity extends AppCompatActivity {
                 }catch (Exception e){
                     e.printStackTrace();
                 }
+                reviewsListAdapter.resetData(reviews);
             }
 
             @Override
@@ -308,7 +304,7 @@ public class MovieInformationActivity extends AppCompatActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment implements ReviewsAdapter.ReviewsAdapterOnClickHandler{
+    public static class PlaceholderFragment extends Fragment implements ReviewsAdapter.ReviewsAdapterOnClickHandler, TrailerAdapter.TrailerAdapterOnClickHandler{
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -334,21 +330,11 @@ public class MovieInformationActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
             reviewsListAdapter = new ReviewsAdapter(getContext(), this, reviews);
-            trailerListAdapter = new TrailerAdapter(getContext(), trailers);
+            trailerListAdapter = new TrailerAdapter(getContext(), this, trailers);
 
             View overviewRootView = inflater.inflate(R.layout.content_details, container, false);
             TextView overview = (TextView)overviewRootView.findViewById(R.id.overview);
-//            View loadingView = (View)overviewRootView.findViewById(R.id.loadingView);
-//            loadingView.setVisibility(View.GONE);
             overview.setText(movieClicked.getOverview());
-
-            View trailerRootView = inflater.inflate(R.layout.trailer_list_tab, container, false);
-            RecyclerView trailerList = (RecyclerView)trailerRootView.findViewById(R.id.trailerList);
-            final LinearLayoutManager trailerLayoutManager = new LinearLayoutManager(getContext());
-            trailerLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-            trailerList.setLayoutManager(trailerLayoutManager);
-            trailerList.setHasFixedSize(true);
-            trailerList.setAdapter(trailerListAdapter);
 
             View reviewsRootView = inflater.inflate(R.layout.reviews_list_tab, container, false);
             RecyclerView reviewList = (RecyclerView)reviewsRootView.findViewById(R.id.reviewList);
@@ -357,8 +343,19 @@ public class MovieInformationActivity extends AppCompatActivity {
             reviewList.setLayoutManager(layoutManager);
             reviewList.setHasFixedSize(true);
             reviewList.setAdapter(reviewsListAdapter);
+            //Get the reviews list from API and reset the recycle view
+            reviews = getReviews(movieClicked.getId());
 
-Log.e("SectionID", getArguments().getInt(ARG_SECTION_NUMBER)+"");
+            View trailerRootView = inflater.inflate(R.layout.trailer_list_tab, container, false);
+            RecyclerView trailerList = (RecyclerView)trailerRootView.findViewById(R.id.trailerList);
+            final LinearLayoutManager trailerLayoutManager = new LinearLayoutManager(getContext());
+            trailerLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            trailerList.setLayoutManager(trailerLayoutManager);
+            trailerList.setHasFixedSize(true);
+            trailerList.setAdapter(trailerListAdapter);
+            //Get the trailers list from API and reset the recycle view
+            trailers = getTrailers(movieClicked.getId());
+
             switch (getArguments().getInt(ARG_SECTION_NUMBER)){
                 case 1 :
                     return overviewRootView;
@@ -374,6 +371,19 @@ Log.e("SectionID", getArguments().getInt(ARG_SECTION_NUMBER)+"");
         @Override
         public void onClick(int index, ReviewsDetails review) {
 
+        }
+
+        @Override
+        public void onClick(int index, TrailerDetails trailer) {
+            Log.e("T-debug", "Trailer clicked "+trailer.getKey());
+            try {
+                String url = AppConstants.VIDEO_BASE + trailers.get(index).getKey();
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                startActivity(i);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 

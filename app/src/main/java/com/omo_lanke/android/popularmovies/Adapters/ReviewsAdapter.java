@@ -7,13 +7,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.omo_lanke.android.popularmovies.R;
 import com.omo_lanke.android.popularmovies.model.ReviewsDetails;
-import com.omo_lanke.android.popularmovies.utils.AppConstants;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 

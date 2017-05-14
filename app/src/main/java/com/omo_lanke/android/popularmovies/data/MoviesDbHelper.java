@@ -3,6 +3,7 @@ package com.omo_lanke.android.popularmovies.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
 import com.omo_lanke.android.popularmovies.data.MoviesContract.MoviesEntry;
 
 /**

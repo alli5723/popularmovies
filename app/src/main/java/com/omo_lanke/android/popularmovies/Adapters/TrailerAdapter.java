@@ -22,9 +22,17 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
     private Context context;
     private List<TrailerDetails> values;
 
-    public TrailerAdapter(@NonNull Context context, List<TrailerDetails> t) {
+    final private TrailerAdapterOnClickHandler mClickHandler;
+
+    public interface TrailerAdapterOnClickHandler{
+        void onClick(int index, TrailerDetails trailer);
+    }
+
+    public TrailerAdapter(@NonNull Context context, TrailerAdapterOnClickHandler clickHandler, List<TrailerDetails> t) {
         this.context = context;
         values = t;
+        mClickHandler = clickHandler;
+        Log.e("T-Adapter", "Trailer Adapter called");
     }
 
     public class TrailerAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -44,6 +52,8 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
 
         public void onClick(View v){
             int pos = getAdapterPosition();
+            //Captures the click from tis Adapter and sends to the activity
+            mClickHandler.onClick(pos, values.get(pos));
         }
     }
 
@@ -71,5 +81,10 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerA
     public int getItemCount() {
         if(null == values) return 0;
         return values.size();
+    }
+
+    public void resetData(List<TrailerDetails> trailer) {
+        values = trailer;
+        notifyDataSetChanged();
     }
 }

@@ -35,7 +35,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>, MovieAdapter.MovieAdapterOnClickHandler{
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>
+        , MovieAdapter.MovieAdapterOnClickHandler{
 
     @BindView(R.id.loadingView)
     LinearLayout loadingView;
@@ -45,9 +46,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @BindView(R.id.movieList)
     RecyclerView movieList;
 
+    Menu menu;
+    public static int SELECTED_MENU = 0;
+    public static String USER_LIST_TYPE = "list_type";
+
     private String sortby = "popularity.desc";
     private String page = "1";
     public MovieAdapter myListAdapter;
+    public static List<MovieDetail> moviesList = null;
     String TAG = MainActivity.class.getSimpleName();
 
     private static final int ID_FAVORITE_LOADER = 1;
@@ -90,46 +96,32 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         movieList.setHasFixedSize(true);
         movieList.setAdapter(myListAdapter);
 
-        apiCall();
-    }
+        if (savedInstanceState != null) {
+            // Restore the list to what was
+            SELECTED_MENU = savedInstanceState.getInt(USER_LIST_TYPE);
 
-    private void fetchFavorite(){
-        loadingView.setVisibility(View.VISIBLE);
-        List<MovieDetail> moviesList = null;
+        }else{
+            apiCall();
+        }
 
-        try{
-//            getContentResolver().query();
-            getSupportLoaderManager().initLoader(ID_FAVORITE_LOADER, null, this);
-//            moviesList = ;//Get something from DB
-        }catch (Exception e){
-            e.printStackTrace();
-            Snackbar.make(loadingView, "Error Occured, Couldn't PARSE the result.", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
-        }
-        loadingView.setVisibility(View.GONE);
-        if(moviesList.size() == 0 || null == moviesList){
-            Snackbar.make(loadingView, "Error Occured, Couldn't PARSE the result.", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
-        }
-//        myListAdapter.resetData(moviesList);
     }
 
     public void apiCall(){
         loadingView.setVisibility(View.VISIBLE);
-        Call<ApiResponse> popularMovies = new TMDBService().endpoints().listMovies(sortby, AppConstants.APIKey, page);
+        Call<ApiResponse> popularMovies = new TMDBService().endpoints().listMovies(sortby,
+                AppConstants.APIKey, page);
 
         popularMovies.enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
 
-                List<MovieDetail> moviesList = null;
                 try{
                     moviesList = response.body().getResults();
                     loadingView.setVisibility(View.GONE);
                 }catch (Exception e){
                     e.printStackTrace();
-                    Snackbar.make(loadingView, "Error Occured, Couldn't PARSE the result.", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    Snackbar.make(loadingView, "Error Occured, Couldn't PARSE the result.",
+                            Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 }
                 myListAdapter.resetData(moviesList);
             }
@@ -138,8 +130,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             public void onFailure(Call<ApiResponse> call, Throwable t) {
                 Log.e("response error", "onFailure: " + t.getMessage() );
                 loadingView.setVisibility(View.GONE);
-                Snackbar.make(loadingView, "Unable to fetch movies at this time, please try again later.", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Snackbar.make(loadingView, "Unable to fetch movies at this time, please try again later.",
+                        Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
         });
     }
@@ -155,12 +147,47 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         getSupportActionBar().setTitle(name);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(USER_LIST_TYPE, SELECTED_MENU);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        SELECTED_MENU = savedInstanceState.getInt(USER_LIST_TYPE);
+    }
+
 @Override
 public boolean onCreateOptionsMenu(Menu menu) {
     MenuInflater inflater = getMenuInflater();
     inflater.inflate(R.menu.menu_details, menu);
     return true;
 }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+            // Restore the list to what was
+            MenuItem menuItem;
+            switch (SELECTED_MENU){
+                case 0 :
+                    menuItem =  menu.findItem(R.id.action_popular);
+                    break;
+                case 1 :
+                    menuItem =  menu.findItem(R.id.action_rating);
+                    break;
+                case 2 :
+                    menuItem =  menu.findItem(R.id.action_favorite);
+                    break;
+                default:
+                    menuItem = menu.findItem(R.id.action_popular);
+                    break;
+            }
+            menuItem.setChecked(true);
+            showList(SELECTED_MENU);
+        return super.onPrepareOptionsMenu(menu);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -170,29 +197,48 @@ public boolean onCreateOptionsMenu(Menu menu) {
 //        myListAdapter.clearData();
 
         if (id == R.id.action_popular) {
-            changeTitle("Popular Movies");
-            Log.i(TAG, "onOptionsItemSelected: Popular");
-            sortby = "popularity.desc";
+            SELECTED_MENU = 0;
         }else if(id == R.id.action_rating){
-            changeTitle("High rated Movies");
-            Log.i(TAG, "onOptionsItemSelected: Rating");
-            sortby = "vote_average.desc";
+            SELECTED_MENU = 1;
         }else if(id == R.id.action_favorite){
-            changeTitle("Favorites");
-            Log.d(TAG, "onOptionsItemSelected: Favorite");
-            //Fetch from DB
-//            fetchFavorite();
-            getSupportLoaderManager().initLoader(ID_FAVORITE_LOADER, null, this);
-            return super.onOptionsItemSelected(item);
+            SELECTED_MENU = 2;
         }
-        apiCall();
+        showList(SELECTED_MENU);
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onClick(int index, MovieDetail movie) {
-        Log.i("MovieC", "Movie Clicked is "+movie.getOriginal_title());
         showDetails(movie);
+    }
+
+    public void showList(int index){
+        switch (index){
+            case 0 :
+                changeTitle("Popular Movies");
+                Log.i(TAG, "onOptionsItemSelected: Popular");
+                sortby = "popularity.desc";
+                apiCall();
+                break;
+            case 1 :
+                changeTitle("Highly Rated Movies");
+                Log.i(TAG, "onOptionsItemSelected: Rating");
+                sortby = "vote_average.desc";
+                apiCall();
+                break;
+            case 2 :
+                changeTitle("Favorites");
+                Log.d(TAG, "onOptionsItemSelected: Favorite");
+                //Fetch from DB
+                getSupportLoaderManager().initLoader(ID_FAVORITE_LOADER, null, this);
+                break;
+            default:
+                changeTitle("Popular Movies");
+                Log.i(TAG, "onOptionsItemSelected: Popular");
+                sortby = "popularity.desc";
+                apiCall();
+                break;
+        }
     }
 
     @Override
