@@ -9,6 +9,7 @@
     </style>
 
     <style name="AppTheme.NoActionBar">
+        <item name="android:homeAsUpIndicator">@drawable/ic_navigate_before_white_24px</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
