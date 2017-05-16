@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
@@ -29,10 +28,7 @@ import com.omo_lanke.android.popularmovies.model.ApiResponse;
 import com.omo_lanke.android.popularmovies.model.MovieDetail;
 import com.omo_lanke.android.popularmovies.utils.AppConstants;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -212,7 +208,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         int id = item.getItemId();
         Log.i(TAG, "onOptionsItemSelected: settings");
         item.setChecked(true);
-//        myListAdapter.clearData();
 
         if (id == R.id.action_popular) {
             SELECTED_MENU = 0;
@@ -254,7 +249,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 changeTitle("Popular Movies");
                 Log.i(TAG, "onOptionsItemSelected: Popular");
                 sortby = "popularity.desc";
-//                apiCall();
                 break;
         }
     }
