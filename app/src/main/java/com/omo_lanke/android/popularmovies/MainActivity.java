@@ -29,6 +29,9 @@ import com.omo_lanke.android.popularmovies.model.ApiResponse;
 import com.omo_lanke.android.popularmovies.model.MovieDetail;
 import com.omo_lanke.android.popularmovies.utils.AppConstants;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
@@ -50,11 +53,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     public static int SELECTED_MENU = 0;
     public static String USER_LIST_TYPE = "list_type";
+    private static final String BUNDLE_RECYCLER_LAYOUT = "classname.recycler.layout";
+    private static final String BUNDLE_MOVIE_LIST = "movie_list";
 
     private String sortby = "popularity.desc";
     private String page = "1";
     public MovieAdapter myListAdapter;
-    public static List<MovieDetail> moviesList = null;
+    public static ArrayList<MovieDetail> moviesList = null;
     String TAG = MainActivity.class.getSimpleName();
 
     private static final int ID_FAVORITE_LOADER = 1;
@@ -101,6 +106,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             // Restore the list to what was
             SELECTED_MENU = savedInstanceState.getInt(USER_LIST_TYPE);
 
+            moviesList = savedInstanceState.getParcelableArrayList(BUNDLE_MOVIE_LIST);
+            myListAdapter.resetData(moviesList);
+            Parcelable savedRecyclerLayoutState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_LAYOUT);
+            movieList.getLayoutManager().onRestoreInstanceState(savedRecyclerLayoutState);
+
         }else{
             apiCall();
         }
@@ -109,6 +119,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     public void apiCall(){
         loadingView.setVisibility(View.VISIBLE);
+        try{
+            myListAdapter.clearData();
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
         Call<ApiResponse> popularMovies = new TMDBService().endpoints().listMovies(sortby,
                 AppConstants.APIKey, page);
 
@@ -206,22 +221,24 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         outState.putInt(USER_LIST_TYPE, SELECTED_MENU);
+        outState.putParcelable(BUNDLE_RECYCLER_LAYOUT, movieList.getLayoutManager().onSaveInstanceState());
+
+        outState.putParcelableArrayList(BUNDLE_MOVIE_LIST,moviesList);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        SELECTED_MENU = savedInstanceState.getInt(USER_LIST_TYPE);
     }
 
-@Override
-public boolean onCreateOptionsMenu(Menu menu) {
-    MenuInflater inflater = getMenuInflater();
-    inflater.inflate(R.menu.menu_details, menu);
-    return true;
-}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_details, menu);
+        return true;
+    }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -255,10 +272,16 @@ public boolean onCreateOptionsMenu(Menu menu) {
 
         if (id == R.id.action_popular) {
             SELECTED_MENU = 0;
+            sortby = "popularity.desc";
+            apiCall();
         }else if(id == R.id.action_rating){
             SELECTED_MENU = 1;
+            sortby = "vote_average.desc";
+            apiCall();
         }else if(id == R.id.action_favorite){
             SELECTED_MENU = 2;
+            //Fetch from DB
+            getSupportLoaderManager().initLoader(ID_FAVORITE_LOADER, null, this);
         }
         showList(SELECTED_MENU);
         return super.onOptionsItemSelected(item);
@@ -274,26 +297,20 @@ public boolean onCreateOptionsMenu(Menu menu) {
             case 0 :
                 changeTitle("Popular Movies");
                 Log.i(TAG, "onOptionsItemSelected: Popular");
-                sortby = "popularity.desc";
-                apiCall();
                 break;
             case 1 :
                 changeTitle("Highly Rated Movies");
                 Log.i(TAG, "onOptionsItemSelected: Rating");
-                sortby = "vote_average.desc";
-                apiCall();
                 break;
             case 2 :
                 changeTitle("Favorites");
                 Log.d(TAG, "onOptionsItemSelected: Favorite");
-                //Fetch from DB
-                getSupportLoaderManager().initLoader(ID_FAVORITE_LOADER, null, this);
                 break;
             default:
                 changeTitle("Popular Movies");
                 Log.i(TAG, "onOptionsItemSelected: Popular");
                 sortby = "popularity.desc";
-                apiCall();
+//                apiCall();
                 break;
         }
     }
